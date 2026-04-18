@@ -400,6 +400,32 @@ const InputPage = () => {
             />
         )}
         <h3><FaUserMd /> Doktorun Notu</h3>
+        
+        {/* Hızlı Not Butonları */}
+        <div className="quick-notes-container">
+          {[
+            "Karaciğer parankimi ekojenitesi artmıştır.",
+            "Malignite açısından şüpheli nodül izlendi.",
+            "Klinik korelasyon ve takip önerilir.",
+            "Ek patolojik bulgu saptanmadı.",
+            "Sirotik zemin ile uyumlu bulgular."
+          ].map((note, index) => (
+            <button 
+              key={index} 
+              type="button"
+              className="quick-note-btn"
+              onClick={() => {
+                const currentNote = form.doctor_note ? form.doctor_note.trim() : "";
+                const newNote = currentNote ? `${currentNote} ${note}` : note;
+                setForm({ ...form, doctor_note: newNote });
+              }}
+            >
+              + {note.split(' ')[0]}...
+              <span className="tooltip">{note}</span>
+            </button>
+          ))}
+        </div>
+
         <textarea name="doctor_note" value={form.doctor_note} onChange={handleChange} placeholder="Doktorun bu hasta için özel notu..." className="doktor-textarea" />
       </div>
 

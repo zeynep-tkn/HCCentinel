@@ -200,14 +200,22 @@
     margin-bottom: 15px;
     text-align: center;
 }
-.input-wrapper,
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px; /* Input'lar arası ferah boşluk */
+}
+
 .button-wrapper {
   position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center; /* Dikeyde ve yatayda tam orta */
-  margin: 0;
-  padding: 0;
+  align-items: center;
+  margin-top: 10px; /* Butonun üstündeki boşluk */
+  margin-bottom: 5px;
 }
 
