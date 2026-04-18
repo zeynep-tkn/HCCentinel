@@ -119,7 +119,7 @@ async def generate_radiology_report_vlm(image_bytes: bytes, predicted_stage_labe
     if not client:
         return {"text": "VLM Raporu oluşturulamadı: Gemini servisi yüklenmedi.", "model_used": "N/A"}
     
-    model_to_use = 'gemini-1.5-flash' # Kota uyumluluğu ve stabilite için standart isim kullanıyoruz
+    model_to_use = 'gemini-1.5-flash-latest' # Daha yüksek uyumluluk için latest sürümü kullanıyoruz
     model = client.GenerativeModel(model_to_use)
     prompt_template = f"""Aşağıdaki ultrason görüntüsünü değerlendir. Tanı: {predicted_stage_label}. Sadece bu görüntüye göre hastalığın mevcut evresine dair tıbbi bir rapor oluştur. Raporun başında hangi evre olduğu açıkça belirtilmeli. Ortalama 4-5 cümlelik, profesyonel ve tıbbi bir dille yazılmış, açıklayıcı ve yapılandırılmış bir **SONUÇ** bölümü üret. Giriş cümlesi ya da açıklama yapma; sadece sonuç bölümünü üret."""
     
@@ -167,7 +167,7 @@ Aşağıdaki başlıkları kullanarak, yukarıdaki verileri sentezleyen detaylı
     
     try:
         if service_name == 'gemini':
-            model_to_use = 'gemini-1.5-pro' if model_name == 'pro' else 'gemini-1.5-flash'
+            model_to_use = 'gemini-1.5-pro-latest' if model_name == 'pro' else 'gemini-1.5-flash-latest'
             model = client.GenerativeModel(model_to_use)
             response = await model.generate_content_async(prompt)
             return {"text": response.text, "model_used": model_to_use}

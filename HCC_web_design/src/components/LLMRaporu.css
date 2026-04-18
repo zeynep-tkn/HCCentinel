@@ -85,30 +85,38 @@
 /* Her bir bilgi öğesi */
 .info-item {
   display: flex;
-  align-items: baseline;
-  font-size: 15px;
-  color: black;
+  justify-content: flex-start; /* Sola yanaştır */
+  gap: 10px; /* Aradaki boşluğu daralt */
+  font-size: 17px;
+  color: #1e293b;
+  margin-bottom: 5px;
+  text-align: left;
 }
 
 /* Bilgi etiketleri */
 .info-item strong {
-  font-weight: normal;
-  min-width: 20px;
-  text-align: left;
-  margin-right: 5px;
+  font-weight: 700;
+  width: 100px; /* Sabit genişlik ama dar */
+  color: #334155;
+  flex-shrink: 0;
 }
 
 /* Bilgi değerleri */
 .info-item span {
-  flex-grow: 1;
-  white-space: nowrap;
-  text-align: left;
+  font-weight: 500;
+  color: #1e3a8a;
 }
 
-/* Risk Değeri 'Yüksek Risk' ise kalın punto */
+/* Risk alanı için özel sade vurgu */
 .risk-kalin {
-  font-weight: bold;
-  color: black;
+  font-weight: 800;
+  color: #ef4444 !important;
+  font-size: 18px;
+}
+
+/* Eğer düşük riskse mavi kalsın */
+.info-item span:not(.risk-kalin) {
+  color: #1e3a8a;
 }
 
 /* LLM Sonuçları Kutusu */
