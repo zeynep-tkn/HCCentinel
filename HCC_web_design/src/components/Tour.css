@@ -1,0 +1,61 @@
+/* Input ve kutucuğu bir arada tutan sarmalayıcı */
+.tour-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Bilgi kutucuğunun kendisi */
+.tour-box {
+  position: absolute;
+  left: 105%; 
+  top: 50%;
+  transform: translateY(-50%);
+  width: 240px;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  z-index: 100;
+}
+
+/* Butonun altındaki kutucuk için özel konum */
+.tour-box.for-button {
+    left: 50%;
+    top: 115%;
+    transform: translateX(-50%);
+}
+
+.tour-box-title {
+  font-weight: bold;
+  font-size: 15px;
+  color: #004cff;
+  margin: 0 0 8px 0;
+}
+
+.tour-box-content {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.tour-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tour-button {
+    background-color: #004cff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.tour-button.secondary {
+    background-color: #6c757d;
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr"> <!-- Varsayılan dilinizi buraya ayarlayın --> 
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the public folder during the build. 
+      Only files inside the public folder can be referenced from the HTML. 
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running npm run build. 
+    -->
+    <title>React App</title>
+
+    <!-- Google Translate Widget Kodu Başlangıcı -->
+    <style>
+      /* Google Translate widget'ının stilini ayarlamak için */
+      #google_translate_element {
+        position: absolute;
+        top: 5px; /* Sağ üst köşeye daha yakın, biraz aşağı kaydırdık */
+        right: 100px; /* Sağ üst köşeye daha yakın */
+        z-index: 9999; /* Diğer tüm elemanların üzerinde görünmesini sağlar */
+        font-family: 'Inter', sans-serif; /* Daha modern bir font */
+        border-radius: 12px; /* Daha yuvarlak köşeler */
+        overflow: hidden; /* İçeriğin taşmasını engelle */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Daha belirgin bir gölge */
+        transition: all 0.3s ease-in-out; /* Geçiş efekti */
+      }
+
+      #google_translate_element:hover {
+          transform: translateY(-2px); /* Hafif yukarı kalkma efekti */
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* Gölgeyi büyütme */
+      }
+
+      /* Google Translate'in kendi iframe'inin stilini değiştirmek zordur,
+         ancak ana div'i konumlandırabiliriz ve genel görünümünü iyileştirebiliriz. */
+      .goog-te-gadget-simple {
+        border: none !important; /* Kenarlığı kaldırdık */
+        background-color: #ffffff !important; /* Beyaz arka plan */
+        border-radius: 12px !important; /* Köşeleri yuvarlat */
+        padding: 8px 15px !important; /* İç boşluğu artırdık */
+        box-shadow: none !important; /* Ana div'e gölge verdiğimiz için burada kaldırdık */
+        font-size: 15px !important; /* Yazı boyutunu artırdık */
+        font-weight: 500 !important; /* Yazı kalınlığını artırdık */
+        color: #333 !important; /* Yazı rengini ayarlayın */
+        display: flex !important; /* İçeriği ortalamak için flexbox kullanın */
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .goog-te-gadget-simple a {
+        color: #1e3a8a !important; /* Link rengini ayarlayın */
+        text-decoration: none !important; /* Alt çizgiyi kaldırdık */
+      }
+      .goog-te-gadget-simple .VIpgJd-Z0844B-Z0844B-M1P5jf { /* Google'ın kendi ikonuna erişim */
+          display: none !important; /* İkonu gizledik, daha sade bir görünüm için */
+      }
+      .goog-te-gadget-simple .goog-te-menu-value span {
+          font-weight: 600 !important; /* Menüdeki yazı daha kalın */
+          color: #1e3a8a !important; /* Menüdeki yazı rengi */
+      }
+      .goog-te-gadget-simple .goog-te-menu-value img {
+          display: none !important; /* Bayrak ikonlarını gizledik */
+      }
+    </style>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: 'tr', // Sayfanızın varsayılan dili
+            includedLanguages: 'en,de,fr', // Hangi dillere çeviri yapılmasını istersiniz (örnek olarak)
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE, // Basit bir düzen
+            autoDisplay: false // Otomatik olarak açılmasını engeller, manuel tetikleme için
+          },
+          'google_translate_element' // Widget'ın yerleştirileceği div'in ID'si
+        );
+      }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <!-- Google Translate Widget Kodu Sonu -->
+
+  </head> 
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div> 
+
+    <!-- Google Translate widget'ının yerleşeceği div -->
+    <div id="google_translate_element"></div>
+
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run npm start or yarn start. 
+      To create a production bundle, use npm run build or yarn build.
+    -->
+  </body>
+</html> 

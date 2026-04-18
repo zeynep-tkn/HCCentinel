@@ -1,0 +1,19 @@
+
+# Hassas Bilgiler
+api_keys.txt
+*.db
+.env
+
+# Büyük Dosyalar (100MB Limitini aşanlar)
+HCC_web_design-API/fibroz_vgg16_model.h5
+
+# Python gereksizleri
+**/__pycache__/
+*.pyc
+.venv/
+
+# Node.js gereksizleri
+**/node_modules/
+dist/
+build/
+.DS_Store
