@@ -61,55 +61,66 @@ const RegisterPage = () => {
 
   return (
     <div className="login-container">
-      <div className="login-header" style={{ marginTop: '30px', marginBottom: '10px' }}>
-        <img src={logo} alt="Logo" style={{ width: '280px', marginBottom: '-5px' }} />
-        <p className="welcome-text" style={{ margin: '10px 0 10px', fontSize: '18px' }}>
-          Yeni bir hesap oluşturun
-        </p>
+      <div className="login-header">
+        <img src={logo} alt="Logo" className="login-logo" />
+        <p className="welcome-text">Yeni bir hesap oluşturun</p>
       </div>
 
-      {/* Form etiketini kullanmak daha doğru */}
-      <form className="login-box" style={{ marginTop: '0px' }} onSubmit={handleRegister}>
-        
-        {/* HATA MESAJINI GÖSTERMEK İÇİN EKLENEN KISIM */}
+      <form className="login-box" onSubmit={handleRegister}>
         {error && <p className="error-message">{error}</p>}
         
-        <input
-          type="text"
-          name="name"
-          placeholder="Adınız"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="surname"
-          placeholder="Soyadınız"
-          value={form.surname}
-          onChange={handleChange}
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="E-posta"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Şifre"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">Hesap Oluştur</button>
+        <div className="input-wrapper">
+          <input
+            type="text"
+            name="name"
+            placeholder="Adınız"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-wrapper">
+          <input
+            type="text"
+            name="surname"
+            placeholder="Soyadınız"
+            value={form.surname}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-wrapper">
+          <input
+            type="email"
+            name="email"
+            placeholder="E-posta"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-wrapper">
+          <input
+            type="password"
+            name="password"
+            placeholder="Şifre"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="button-wrapper">
+          <button type="submit">Hesap Oluştur</button>
+        </div>
 
         <div className="login-footer">
           <p className="register-link">
             Zaten hesabınız var mı?{' '}
-            <span onClick={() => navigate('/')} style={{cursor: 'pointer', color: '#007bff'}}>Giriş yap</span>
+            <span onClick={() => navigate('/')} style={{cursor: 'pointer', color: '#004cff'}}>Giriş yap</span>
           </p>
         </div>
       </form>

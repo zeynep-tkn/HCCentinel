@@ -134,10 +134,18 @@
 .login-box input {
   width: 100%;
   padding: 12px;
-  /* Buradaki margin-bottom artık wrapper'da olduğu için gereksiz */
-  border: 1px solid #ccc;
+  background-color: #eef2f6; /* Modern hafif mavi/gri arka plan */
+  border: 1px solid #ced4da;
   border-radius: 8px;
   font-size: 14px;
+  transition: all 0.2s ease;
+  box-sizing: border-box; /* Padding'in genişliği bozmasını engeller */
+}
+
+.login-logo {
+  width: 280px;
+  height: auto;
+  margin-top: 20px;
 }
 
 .login-box input:focus {
@@ -198,5 +206,8 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center; /* Dikeyde ve yatayda tam orta */
+  margin: 0;
+  padding: 0;
 }
 
