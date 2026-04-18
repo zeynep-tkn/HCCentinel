@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './LoginPage.css'; // Stil için LoginPage.css'i kullanabiliriz
+import './LoginPage.css'; 
 import logo from '../assets/HCCentinel.png'; 
+import Modal from './Modal';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
   const [form, setForm] = useState({
     name: '',
     surname: '',
     email: '',
     password: ''
   });
-  const [error, setError] = useState(''); // Hata mesajları için
+  const [error, setError] = useState('');
+
+  const showModal = (title, message, type = 'info') => {
+    setModal({ isOpen: true, title, message, type });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
 
-  // handleRegister fonksiyonunu async yapıp API'ye istek gönderecek şekilde güncelledik
   const handleRegister = async (event) => {
-    event.preventDefault(); // Formun default davranışını engelle
-    setError(''); // Her denemede eski hatayı temizle
+    event.preventDefault();
+    setError('');
 
-    // Şifre ve email kontrolü
     if (!form.email || !form.password) {
         setError('E-posta ve şifre alanları zorunludur.');
         return;
@@ -32,9 +36,7 @@ const RegisterPage = () => {
     try {
         const response = await fetch('http://localhost:8000/register', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 name: form.name,
                 surname: form.surname,
@@ -46,21 +48,28 @@ const RegisterPage = () => {
         const data = await response.json();
 
         if (!response.ok) {
-            // API'den gelen hata mesajını kullan
             throw new Error(data.detail || 'Kayıt sırasında bir hata oluştu.');
         }
 
-        alert('Hesap başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.');
-        navigate('/'); // Başarılı kayıttan sonra giriş sayfasına yönlendir
+        showModal('Başarılı!', 'Hesap başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.', 'success');
+        setTimeout(() => navigate('/'), 2000); 
 
     } catch (err) {
         console.error('Kayıt hatası:', err);
-        setError(err.message); // Hata mesajını state'e ata
+        setError(err.message);
     }
   };
 
   return (
     <div className="login-container">
+      {/* MODAL BİLEŞENİ */}
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
       <div className="login-header">
         <img src={logo} alt="Logo" className="login-logo" />
         <p className="welcome-text">Yeni bir hesap oluşturun</p>

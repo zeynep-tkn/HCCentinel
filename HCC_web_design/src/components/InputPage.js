@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaArrowRight, FaUserMd } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./InputPage.css";
-
+import Modal from "./Modal"; // Yeni eklenen
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -20,7 +20,6 @@ const TourBox = ({ title, content, isVisible, onNext, onPrev, onClose, isFirst, 
     </div>
   );
 };
-
 
 const LoadingOverlay = () => (
   <div className="loading-overlay">
@@ -49,10 +48,11 @@ const inputPageTourSteps = [
     { title: "5. Hesapla Butonu", content: "Tüm verileri girdikten sonra, risk değerlendirmesini başlatmak için bu butona tıklayın.", type: 'button', className: "" }
 ];
 
-
 const InputPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false); 
+  // Yeni eklenen modal state
+  const [modal, setModal] = useState({ isOpen: false, title: "", message: "", type: "info" });
 
   const [tourStep, setTourStep] = useState(0);
   const totalSteps = inputPageTourSteps.length;
@@ -63,6 +63,11 @@ const InputPage = () => {
   const endTour = () => setTourStep(0);
   const nextStep = () => setTourStep(current => (current < totalSteps ? current + 1 : 0));
   const prevStep = () => setTourStep(current => (current > 1 ? current - 1 : 0));
+
+  // Modal'ı açmak için yardımcı fonksiyon
+  const showModal = (title, message, type = "info") => {
+    setModal({ isOpen: true, title, message, type });
+  };
 
   useEffect(() => {
     if (tourStep === 0) return;
@@ -104,8 +109,8 @@ const InputPage = () => {
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
     if (!userId) {
-      alert("Bu sayfayı görüntülemek için lütfen giriş yapın.");
-      navigate("/");
+      showModal("Yetkisiz Erişim", "Bu sayfayı görüntülemek için lütfen giriş yapın.", "error");
+      setTimeout(() => navigate("/"), 2000);
     }
   }, [navigate]);
 
@@ -144,13 +149,13 @@ const InputPage = () => {
   const handleCalculate = async () => {
     const userId = localStorage.getItem("user_id");
     if (!userId) {
-      alert("Lütfen tekrar giriş yapın.");
+      showModal("Hata", "Lütfen tekrar giriş yapın.", "error");
       navigate("/");
       return;
     }
 
     if (!form.name || !form.surname || !form.tc || !form.Yas || !form.gender) {
-      alert("Lütfen hasta bilgilerini (Ad, Soyad, TC, Yaş, Cinsiyet) eksiksiz doldurun.");
+      showModal("Eksik Bilgi", "Lütfen hasta bilgilerini (Ad, Soyad, TC, Yaş, Cinsiyet) eksiksiz doldurun.", "error");
       return;
     }
 
@@ -161,7 +166,6 @@ const InputPage = () => {
       Albumin: parseFloat(form.Albumin || 0), ALP: parseFloat(form.ALP || 0),
       ALT: parseFloat(form.ALT || 0), AST: parseFloat(form.AST || 0),
       BIL: parseFloat(form.BIL || 0), GGT: parseFloat(form.GGT || 0),
-      Albumin: parseFloat(form.Albumin || 0),
     };
 
     const payload = new FormData();
@@ -171,7 +175,7 @@ const InputPage = () => {
     payload.append("patient_tc", form.tc);
     payload.append("lab_data", JSON.stringify(labData));
     payload.append("afp_value", parseFloat(form.AFP || 0));
-    payload.append("doctor_name", "Dr. Ayşe"); // İlk istek için varsayılan doktor
+    payload.append("doctor_name", "Dr. Ayşe"); 
     payload.append("alcohol_consumption", form.alcohol || "");
     payload.append("smoking_status", form.smoking || "");
     payload.append("hcv_status", form.hcv || "");
@@ -180,6 +184,7 @@ const InputPage = () => {
     if (ultrasonFile) payload.append("usg_file", ultrasonFile);
     if (btFile) payload.append("mri_file", btFile);
     payload.append("pst", form.PST);
+    payload.append("doctor_note", form.doctor_note || "");
 
     try {
       const response = await fetch("http://localhost:8000/evaluate_hcc_risk", {
@@ -208,7 +213,7 @@ const InputPage = () => {
       });
     } catch (error) {
       console.error("Hesaplama hatası:", error);
-      alert("Hesaplama sırasında hata oluştu: " + error.message);
+      showModal("Hesaplama Hatası", error.message, "error");
     } finally {
       setIsLoading(false);
     }
@@ -227,6 +232,15 @@ const InputPage = () => {
       
       {isLoading && <LoadingOverlay />}
 
+      {/* MODAL BİLEŞENİ */}
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
+
       <button ref={tourIconRef} onClick={startTour} className="info-icon-button" title="Rehberi Başlat">
         <FontAwesomeIcon icon={faLightbulb} size="2x" />
       </button>
@@ -240,12 +254,10 @@ const InputPage = () => {
           disabled={isLoading}
           onClick={() => {
             const apiResult = sessionStorage.getItem("apiResult");
-            const vlmReport = sessionStorage.getItem("vlmReport");
-            const patientDetails = sessionStorage.getItem("patientDetails");
-            if (apiResult && vlmReport && patientDetails) {
+            if (apiResult) {
               navigate("/sonuc");
             } else {
-              alert("Henüz hesaplama yapılmadı. Lütfen önce 'Hesapla' butonuna basın.");
+              showModal("Uyarı", "Henüz hesaplama yapılmadı. Lütfen önce 'Hesapla' butonuna basın.", "info");
             }
           }}
         >
@@ -401,7 +413,6 @@ const InputPage = () => {
         )}
         <h3><FaUserMd /> Doktorun Notu</h3>
         
-        {/* Hızlı Not Butonları */}
         <div className="quick-notes-container">
           {[
             "Karaciğer parankimi ekojenitesi artmıştır.",
@@ -410,11 +421,7 @@ const InputPage = () => {
             "Ek patolojik bulgu saptanmadı.",
             "Sirotik zemin ile uyumlu bulgular."
           ].map((note, index) => (
-            <button 
-              key={index} 
-              type="button"
-              className="quick-note-btn"
-              onClick={() => {
+            <button key={index} type="button" className="quick-note-btn" onClick={() => {
                 const currentNote = form.doctor_note ? form.doctor_note.trim() : "";
                 const newNote = currentNote ? `${currentNote} ${note}` : note;
                 setForm({ ...form, doctor_note: newNote });
