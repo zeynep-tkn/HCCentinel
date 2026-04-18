@@ -319,6 +319,7 @@ async def evaluate_hcc_risk(
         "vlm_model_used": vlm_report_data.get("model_used"),
         "comprehensive_report": comprehensive_report_data.get("text"),
         "comprehensive_model_used": comprehensive_report_data.get("model_used"),
+        "doctor_note": doctor_note or "",
     }
 
 # --- ÇALIŞTIRMA BLOĞU ---

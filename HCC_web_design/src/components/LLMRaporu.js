@@ -132,6 +132,14 @@ const LLMRaporu = () => {
             <div className="llm-sonuclari">
                 {renderComprehensiveReport()}
             </div>
+
+            {/* SABİT DOKTOR NOTU ALANI (Mevcut CSS ile uyumlu) */}
+            {(apiResult?.doctor_note || patientDetails?.doctor_note) && (
+                <div className="doctor-note-section">
+                    <h3>DOKTORUN KLİNİK NOTU</h3>
+                    <p>{apiResult?.doctor_note || patientDetails?.doctor_note}</p>
+                </div>
+            )}
         </div>
         <div className="rapor-doktor-footer">
             <p><strong>Raporu Yorumlayan Model:</strong> {apiResult.comprehensive_model_used || "Bilinmiyor"}</p>
