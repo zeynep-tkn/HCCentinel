@@ -2,91 +2,132 @@
 
 /* Genel Rapor Konteyneri */
 .llm-rapor-container {
-  font-family: 'Times New Roman', serif; /* Times New Roman */
-  color: black; /* Siyah renk */
-  background-color: #ffffff; /* Beyaz arkaplan */
-  padding: 30px; /* İç boşluk */
-  border-radius: 12px; /* Köşe yuvarlama */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Hafif gölge */
-  max-width: 800px; /* Rapor genişliğini sabitle */
-  margin: 30px auto; /* Sayfada ortala ve üstten boşluk bırak */
-  min-height: 400px; /* Minimum yükseklik */
+  font-family: 'Times New Roman', serif;
+  /* Times New Roman */
+  color: black;
+  /* Siyah renk */
+  background-color: #ffffff;
+  /* Beyaz arkaplan */
+  padding: 30px;
+  /* İç boşluk */
+  border-radius: 12px;
+  /* Köşe yuvarlama */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  /* Hafif gölge */
+  max-width: 800px;
+  /* Rapor genişliğini sabitle */
+  margin: 30px auto;
+  /* Sayfada ortala ve üstten boşluk bırak */
+  min-height: 400px;
+  /* Minimum yükseklik */
   display: flex;
   flex-direction: column;
-  position: relative; /* Tarih ve indirme butonu için konumlandırma referansı */
+  position: relative;
+  /* Tarih ve indirme butonu için konumlandırma referansı */
 }
 
 /* Rapor Başlığı Konteyneri */
 .rapor-header {
   /* Tarih artık absolute olduğu için text-align: center ve flex-grow ayarları sadece logo ve başlık için geçerli */
-  margin-bottom: 25px; /* Başlık ile altındaki hasta bilgileri arasına boşluk */
-  border-bottom: 1px solid #eee; /* Başlık altına çizgi */
-  padding-bottom: 15px; /* Çizgi ile başlık arasına boşluk */
-  display: flex; /* Logo ve başlığı yan yana hizalamak için */
-  justify-content: center; /* Logo ve başlığı ortala */
-  align-items: center; /* Öğeleri dikeyde ortala */
-  flex-wrap: wrap; /* Küçük ekranlarda alt alta geçmesini sağlar */
-  padding-left: 30px; /* Konteynerin paddingiyle hizala */
-  padding-right: 30px; /* Konteynerin paddingiyle hizala */
+  margin-bottom: 25px;
+  /* Başlık ile altındaki hasta bilgileri arasına boşluk */
+  border-bottom: 1px solid #eee;
+  /* Başlık altına çizgi */
+  padding-bottom: 15px;
+  /* Çizgi ile başlık arasına boşluk */
+  display: flex;
+  /* Logo ve başlığı yan yana hizalamak için */
+  justify-content: center;
+  /* Logo ve başlığı ortala */
+  align-items: center;
+  /* Öğeleri dikeyde ortala */
+  flex-wrap: wrap;
+  /* Küçük ekranlarda alt alta geçmesini sağlar */
+  padding-left: 30px;
+  /* Konteynerin paddingiyle hizala */
+  padding-right: 30px;
+  /* Konteynerin paddingiyle hizala */
 }
 
 /* Rapor Başlığı Metni */
 .rapor-header h1 {
-  font-size: 30px; /* Başlık font boyutu */
-  color: black; /* Başlık metnini siyah yap */
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 30px;
+  /* Başlık font boyutu */
+  color: black;
+  /* Başlık metnini siyah yap */
   margin: 0;
-  text-transform: uppercase; /* Başlığı büyük harf yap */
-  letter-spacing: 1px; /* Harfler arasına boşluk */
-  flex-grow: 1; /* H1'in mümkün olduğunca yer kaplamasını sağlar */
-  text-align: center; /* Başlığı ortalar */
+  text-transform: uppercase;
+  /* Başlığı büyük harf yap */
+  letter-spacing: 1px;
+  /* Harfler arasına boşluk */
+  flex-grow: 1;
+  /* H1'in mümkün olduğunca yer kaplamasını sağlar */
+  text-align: center;
+  /* Başlığı ortalar */
 }
 
 /* Logo Stilleri */
 .rapor-logo {
-  max-width: 250px; /* Logonun maksimum genişliği */
-  height: auto; /* Oranını korur */
-  margin-bottom: 0; /* Flexbox ile yönetildiği için buradaki margin kaldırılabilir veya azaltılabilir */
-  margin-right: 20px; /* Logo ve başlık arasına boşluk */
+  max-width: 250px;
+  /* Logonun maksimum genişliği */
+  height: auto;
+  /* Oranını korur */
+  margin-bottom: 0;
+  /* Flexbox ile yönetildiği için buradaki margin kaldırılabilir veya azaltılabilir */
+  margin-right: 20px;
+  /* Logo ve başlık arasına boşluk */
 }
 
 /* Rapor Tarihi */
 .rapor-tarih {
-  position: absolute; /* Mutlak konumlandırma */
-  top: 130px; /* `.llm-rapor-container`'ın üst paddingiyle aynı hizada başlat */
-  right: 70px; /* `.llm-rapor-container`'ın sağ kenarından 10px uzakta */
+  position: absolute;
+  /* Mutlak konumlandırma */
+  top: 130px;
+  /* `.llm-rapor-container`'ın üst paddingiyle aynı hizada başlat */
+  right: 70px;
+  /* `.llm-rapor-container`'ın sağ kenarından 10px uzakta */
   text-align: right;
-  font-size: 15px; /* Tarih font boyutu */
-  color: #555; /* Tarih rengi */
+  font-size: 15px;
+  /* Tarih font boyutu */
+  color: #555;
+  /* Tarih rengi */
 }
 
 /* Rapor İçeriği */
 .rapor-body {
   flex-grow: 1;
-  padding: 0 20px; /* Tüm içerik için genel sol/sağ boşluk */
+  padding: 0 20px;
+  /* Tüm içerik için genel sol/sağ boşluk */
 }
 
 /* Hasta Bilgileri Bölümü Kapsayıcısı */
 .hasta-bilgileri {
   display: flex;
-  flex-direction: column; /* Bilgileri alt alta sırala */
-  gap: 10px; /* Her bir bilgi satırı arasında dikey boşluk */
+  flex-direction: column;
+  /* Bilgileri alt alta sırala */
+  gap: 10px;
+  /* Her bir bilgi satırı arasında dikey boşluk */
   margin-bottom: 25px;
-  padding-left: 10px; /* Rapor-body'nin 20px'ine ek 10px içeri */
+  padding-left: 10px;
+  /* Rapor-body'nin 20px'ine ek 10px içeri */
 }
 
 /* İlk satır (Hasta Adı Soyadı ve Risk) için özel flex konteyner */
 .info-row-first {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
 }
 
 /* Her bir bilgi öğesi */
 .info-item {
   display: flex;
-  justify-content: flex-start; /* Sola yanaştır */
-  gap: 10px; /* Aradaki boşluğu daralt */
+  justify-content: flex-start;
+  /* Sola yanaştır */
+  gap: 10px;
+  /* Aradaki boşluğu daralt */
   font-size: 17px;
   color: #1e293b;
   margin-bottom: 5px;
@@ -96,7 +137,8 @@
 /* Bilgi etiketleri */
 .info-item strong {
   font-weight: 700;
-  width: 100px; /* Sabit genişlik ama dar */
+  width: 100px;
+  /* Sabit genişlik ama dar */
   color: #334155;
   flex-shrink: 0;
 }
@@ -121,8 +163,10 @@
 
 /* LLM Sonuçları Kutusu */
 .llm-sonuclari {
-  padding: 0; /* İç kutunun kendi iç boşluğunu kaldır */
-  margin-top: 25px; /* Hasta bilgileri ile arasına boşluk bırakmak için */
+  padding: 0;
+  /* İç kutunun kendi iç boşluğunu kaldır */
+  margin-top: 25px;
+  /* Hasta bilgileri ile arasına boşluk bırakmak için */
   margin-bottom: 25px;
   border-radius: 8px;
   font-size: 15px;
@@ -134,26 +178,35 @@
 .llm-sonuclari h4,
 .llm-sonuclari p,
 .llm-list-item-heading {
-  padding-left: 10px; /* .rapor-body'nin 20px'ine ek 10px içeri */
-  padding-right: 10px; /* Sağdan da aynı boşluğu bırak */
-  text-align: justify; /* Metni iki yana hizalar */
+  padding-left: 10px;
+  /* .rapor-body'nin 20px'ine ek 10px içeri */
+  padding-right: 10px;
+  /* Sağdan da aynı boşluğu bırak */
+  text-align: justify;
+  /* Metni iki yana hizalar */
 }
 
 /* LLM özel başlıkları için font ayarı */
 .llm-sonuclari h4 {
-  font-weight: bold; /* Ana başlıklar kalın kalsın */
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: bold;
+  /* Ana başlıklar kalın kalsın */
   margin-top: 15px;
   margin-bottom: 5px;
-  text-align: left; /* Başlıkları sola hizalı bırak */
+  text-align: left;
+  /* Başlıkları sola hizalı bırak */
 }
 
 /* LLM alt başlıkları (tek yıldızdan gelenler) */
 .llm-list-item-heading {
-  font-weight: normal; /* Bu metnin kalın olmamasını sağlar */
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: normal;
+  /* Bu metnin kalın olmamasını sağlar */
   margin-top: 10px;
   margin-bottom: 5px;
   color: #333;
-  text-align: left; /* Bu başlıkları sola hizalı bırak */
+  text-align: left;
+  /* Bu başlıkları sola hizalı bırak */
 }
 
 /* Normal paragraflar için boşluk ayarlamaları */
@@ -163,7 +216,7 @@
 }
 
 /* Bir paragraftan sonra gelen paragraf */
-.llm-sonuclari p + p {
+.llm-sonuclari p+p {
   margin-top: 0;
 }
 
@@ -206,7 +259,8 @@
 
 /* Doktor notu bölümü için yeni stil */
 .doctor-note-section {
-  padding: 0; /* İç kutunun kendi iç boşluğunu kaldır */
+  padding: 0;
+  /* İç kutunun kendi iç boşluğunu kaldır */
   margin-top: 30px;
   margin-bottom: 20px;
   border-radius: 8px;
@@ -219,9 +273,11 @@
   margin-bottom: 10px;
   border-bottom: 1px solid #ddd;
   padding-bottom: 5px;
-  padding-left: 10px; /* .rapor-body'nin 20px'ine ek 10px içeri */
+  padding-left: 10px;
+  /* .rapor-body'nin 20px'ine ek 10px içeri */
   padding-right: 10px;
-  text-align: left; /* Başlığı sola hizalı bırak */
+  text-align: left;
+  /* Başlığı sola hizalı bırak */
 }
 
 .doctor-note-section p {
@@ -230,9 +286,11 @@
   font-size: 15px;
   line-height: 1.6;
   white-space: pre-wrap;
-  padding-left: 10px; /* .rapor-body'nin 20px'ine ek 10px içeri */
+  padding-left: 10px;
+  /* .rapor-body'nin 20px'ine ek 10px içeri */
   padding-right: 10px;
-  text-align: justify; /* Metni iki yana hizalar */
+  text-align: justify;
+  /* Metni iki yana hizalar */
 }
 
 /* RAPORUN ALTINDAKİ DOKTOR VE UYARI METNİ */
@@ -250,26 +308,42 @@
   width: 100%;
 }
 
+.markdown-icerik h2,
+.markdown-icerik h3,
+.markdown-icerik p,
+.markdown-icerik ul,
+.markdown-icerik ol,
+.markdown-icerik li {
+  page-break-inside: avoid;
+}
+
 .markdown-icerik h2 {
-  font-size: 14pt;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 15pt;
   font-weight: bold;
   margin-top: 20px;
   margin-bottom: 8px;
   padding-left: 10px;
   text-align: left;
+  page-break-after: avoid;
 }
 
-.markdown-icerik h3 {
-  font-size: 12pt;
+.markdown-icerik h3,
+.markdown-icerik h4 {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 14pt;
   font-weight: bold;
+  color: black;
   margin-top: 15px;
   margin-bottom: 6px;
   padding-left: 10px;
   text-align: left;
+  page-break-after: avoid;
 }
 
 .markdown-icerik p {
-  font-size: 11pt;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13pt;
   margin-top: 0;
   margin-bottom: 10px;
   padding-left: 10px;
@@ -278,13 +352,15 @@
   line-height: 1.6;
 }
 
-.markdown-icerik ul, .markdown-icerik ol {
+.markdown-icerik ul,
+.markdown-icerik ol {
   padding-left: 30px;
   margin-bottom: 10px;
   text-align: left;
 }
 
 .markdown-icerik li {
+  font-family: 'Times New Roman', Times, serif;
   font-size: 11pt;
   line-height: 1.6;
   margin-bottom: 6px;
@@ -292,5 +368,6 @@
 }
 
 .markdown-icerik strong {
+  font-family: 'Times New Roman', Times, serif;
   font-weight: bold;
 }

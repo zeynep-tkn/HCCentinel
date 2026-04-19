@@ -2,6 +2,7 @@
 
 import os
 import io
+import asyncio
 from PIL import Image
 from datetime import datetime
 import google.generativeai as genai
@@ -54,8 +55,15 @@ def load_all_llms():
     try:
         GROQ_API_KEY = api_keys.get("GROQ_API_KEY")
         if GROQ_API_KEY:
-            llm_clients['groq'] = Groq(api_key=GROQ_API_KEY)
-            print("✅ Groq Servisi: Yapılandırıldı")
+            if GROQ_API_KEY.startswith("sk-or"):
+                llm_clients['groq'] = OpenAI(
+                    api_key=GROQ_API_KEY,
+                    base_url="https://openrouter.ai/api/v1"
+                )
+                print("✅ Groq Servisi: OpenRouter üzerinden yapılandırıldı")
+            else:
+                llm_clients['groq'] = Groq(api_key=GROQ_API_KEY)
+                print("✅ Groq Servisi: Direkt yapılandırıldı")
         else:
             print("⚠️ UYARI: api_keys.txt dosyasında GROQ_API_KEY bulunamadı.")
     except Exception as e:
@@ -119,15 +127,27 @@ async def generate_radiology_report_vlm(image_bytes: bytes, predicted_stage_labe
     if not client:
         return {"text": "VLM Raporu oluşturulamadı: Gemini servisi yüklenmedi.", "model_used": "N/A"}
     
-    model_to_use = 'gemini-1.5-flash-latest' # Daha yüksek uyumluluk için latest sürümü kullanıyoruz
+    model_to_use = 'gemini-2.5-flash' # Google API 1.5 sürümünü kaldırdı, 2.5 sürümüne geçildi
     model = client.GenerativeModel(model_to_use)
     prompt_template = f"""Aşağıdaki ultrason görüntüsünü değerlendir. Tanı: {predicted_stage_label}. Sadece bu görüntüye göre hastalığın mevcut evresine dair tıbbi bir rapor oluştur. Raporun başında hangi evre olduğu açıkça belirtilmeli. Ortalama 4-5 cümlelik, profesyonel ve tıbbi bir dille yazılmış, açıklayıcı ve yapılandırılmış bir **SONUÇ** bölümü üret. Giriş cümlesi ya da açıklama yapma; sadece sonuç bölümünü üret."""
     
+    
     try:
         img_for_vlm = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-        response = await model.generate_content_async([prompt_template, img_for_vlm])
-        report_text = response.text.replace('\n', '<br>').replace('**', '<b>').replace('</b>', '')
-        return {"text": report_text, "model_used": model_to_use}
+        
+        # Kota aşımında otomatik yeniden deneme
+        for attempt in range(3):
+            try:
+                response = await model.generate_content_async([prompt_template, img_for_vlm])
+                report_text = response.text.replace('\n', '<br>').replace('**', '<b>').replace('</b>', '')
+                return {"text": report_text, "model_used": model_to_use}
+            except Exception as retry_err:
+                if '429' in str(retry_err) and attempt < 2:
+                    wait_time = 15 * (attempt + 1)
+                    print(f"⏳ VLM kota aşımı, {wait_time}sn sonra tekrar denenecek... (Deneme {attempt+2}/3)")
+                    await asyncio.sleep(wait_time)
+                else:
+                    raise retry_err
     except Exception as e:
         return {"text": f"Gemini VLM Raporu oluşturma hatası: {e}", "model_used": model_to_use}
 
@@ -138,9 +158,21 @@ async def generate_comprehensive_report(context: dict, doctor_name: str):
     if not client:
         return {"text": "Bütünsel rapor oluşturulamadı: Uygun LLM servisi yüklenmemiş.", "model_used": "N/A"}
         
+    # === DEBUG: LLM'ye gelen veriyi terminale yazdır ===
+    print("\n" + "=" * 60)
+    print("🔍 LLM PROMPT DEBUG - Context Verisi:")
+    print(f"   USG Result: {context.get('usg_result')}")
+    print(f"   MRI Analysis: {context.get('mri_analysis')}")
+    print(f"   Doctor Note: {context.get('doctor_note')}")
+    print("=" * 60 + "\n")
+    # === DEBUG SONU ===
+    
+    usg_sec = f"**2. Ultrason (USG) Analizi:** Fibrozis Evresi: {context.get('usg_result').get('stage_label')}" if context.get('usg_result', {}).get('stage_label') else "**2. Ultrason (USG):** Bu hastaya USG çekilmemiştir (Eksik Veri)."
+    mri_sec = f"**3. Manyetik Rezonans (MR) Analizi:** Nodül Sayısı: {context.get('mri_analysis').get('nodule_count')}, Tümör Oranı: %{context.get('mri_analysis').get('tumor_ratio')}, Evre: {context.get('mri_analysis').get('stage')}" if context.get('mri_analysis', {}).get('nodule_count') else "**3. Manyetik Rezonans (MR):** Bu hastaya MR çekilmemiştir (Eksik Veri)."
+
     prompt = f""" 
 # GÖREV VE ROL
-Sen bir Klinik Karar Destek Sistemi asistanısın. Görevin, doktorun manuel notlarını ve sayısal verileri birleştirmektir.
+Sen bir Klinik Karar Destek Sistemi asistanısın. Görevin, doktorun manuel notlarını ve hastanın test sonuçlarını tıbbi bir şekilde birleştirmektir.
 
 # HASTA VERİLERİ
 ---------------------------------
@@ -152,16 +184,16 @@ Sen bir Klinik Karar Destek Sistemi asistanısın. Görevin, doktorun manuel not
 **ANALİZ SONUÇLARI**
 ---------------------------------
 **1. Laboratuvar Veri Analizi:** Tahmin: {context.get('lab_result', {}).get('predicted_disease', 'N/A')}, HCC Olasılığı: %{context.get('lab_result', {}).get('hcc_probability', 0) * 100:.2f}
-**2. Ultrason (USG) Analizi:** Fibrozis Evresi: {context.get('usg_result', {}).get('stage_label', 'N/A')}
-**3. Manyetik Rezonans (MR) Analizi:** Nodül Sayısı: {context.get('mri_analysis', {}).get('nodule_count', 'N/A')}, Tümör Oranı: %{context.get('mri_analysis', {}).get('tumor_ratio', 'N/A')}, Evre: {context.get('mri_analysis', {}).get('stage', 'N/A')}
+{usg_sec}
+{mri_sec}
 **4. Klinik Notlar:** {context.get("doctor_note") or "Belirtilmemiş"}
 
 # KRİTİK TALİMAT (Entegrasyon Zorunluluğu)
-Sana bir "Doktorun Klinik Notu" iletildiğinde, raporun içindeki "veri eksik" veya "bilgi bulunmamaktadır" şeklindeki standart kalıpları derhal iptal etmelisin. 
+Tüm raporu yukarıdaki **ANALİZ SONUÇLARI** bölümüne sıkı sıkıya bağlı kalarak yazacaksın. ASLA sistemde var olan bir veriye "eksik" deme.
 
-1. **ÖZET BÖLÜMÜNDE:** Eğer doktor bir nodül belirtmişse, "Görüntüleme verisi eksik" demek yerine "Doktor tarafından saptanan şüpheli nodül bulgusu mevcuttur" yazmalısın.
-2. **YORUMLAMA BÖLÜMÜNDE:** Doktorun notunu laboratuvarın %31.64'lük skoruyla doğrudan ilişkilendir. (Örn: "Doktorun klinik olarak saptadığı nodül, laboratuvarın yüksek risk skoruyla birleştiğinde malignite şüphesini kuvvetlendirmektedir.")
-3. **ÖNERİLER BÖLÜMÜNDE:** Genel bir liste vermek yerine, doktorun gördüğü o spesifik nodüle yönelik (Biyopsi, Dinamik BT vb.) adımları ilk sıraya koy.
+1. **ÖZET BÖLÜMÜNDE:** USG veya MR verilerinden hangisi varsa onu laboratuvar HCC Olasılığı sonucuyla mutlaka birleştir. Olmayan bir test için sadece "uygulanmamıştır" diyebilirsin.
+2. **YORUMLAMA BÖLÜMÜNDE:** USG'den gelen 'Fibrozis Evresi' teşhisini (Örn: F4-Siroz vb.) laboratuvar yüzdesiyle doğrudan tıbbi bir korelasyona sok.
+3. **ÖNERİLER BÖLÜMÜNDE:** Hastanın çıkan USG veya var olan test sonuçlarına (Örn: Siroz evresi vb.) yönelik acil tanı veya tedavi adımlarını önceliklendir.
 
 # İSTENEN RAPOR FORMATI
 Aşağıdaki başlıkları kullanarak ve SADECE Markdown formatında (HTML kullanmadan) rapor oluştur:
@@ -188,13 +220,22 @@ KESİN KURALLAR (STRICT REQUIREMENTS):
     
     try:
         if service_name == 'gemini':
-            model_to_use = 'gemini-1.5-pro-latest' if model_name == 'pro' else 'gemini-1.5-flash-latest'
+            # Google AI Studio ücretsiz hesaplarında 2.5-pro limiti 0 olduğu için şimdilik flash'a yönlendiriyoruz
+            model_to_use = 'gemini-2.5-flash' 
             model = client.GenerativeModel(model_to_use)
             response = await model.generate_content_async(prompt)
             return {"text": response.text, "model_used": model_to_use}
             
         elif service_name == 'groq':
-            model_to_use = 'llama3-70b-8192' if model_name == 'llama3-70b' else 'llama3-8b-8192'
+            # OpenRouter mı yoksa direkt Groq mu kontrol et
+            client_key = getattr(client, 'api_key', '')
+            if client_key.startswith("sk-or"):
+                # OpenRouter model isimleri
+                model_to_use = "meta-llama/llama-3.3-70b-instruct" if model_name == 'llama3-70b' else "meta-llama/llama-3.1-8b-instruct"
+            else:
+                # Direkt Groq model isimleri
+                model_to_use = 'llama3-70b-8192' if model_name == 'llama3-70b' else 'llama3-8b-8192'
+                
             chat_completion = client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model=model_to_use,

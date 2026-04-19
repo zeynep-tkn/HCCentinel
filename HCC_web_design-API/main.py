@@ -183,8 +183,20 @@ async def load_models_on_startup():
     try:
         if os.path.exists(LAB_MODEL_PATH): model_lab = joblib.load(LAB_MODEL_PATH)
         if os.path.exists(LAB_SCALER_PATH): scaler_lab = joblib.load(LAB_SCALER_PATH)
-        if os.path.exists(USG_MODEL_PATH): model_usg = tf.keras.models.load_model(USG_MODEL_PATH, compile=False)
-        if os.path.exists(MRI_MODEL_PATH): model_mri = tf.keras.models.load_model(MRI_MODEL_PATH, compile=False)
+        if os.path.exists(USG_MODEL_PATH): 
+            # VGG16 modelinde Keras 3 çökmesini (Flatten bug) engellemek için mimariyi kodla kurup sadece ağırlıkları yüklüyoruz.
+            model_usg = tf.keras.models.Sequential([
+                tf.keras.Input((224, 224, 3), name='input_layer_1'),
+                tf.keras.applications.VGG16(include_top=False, weights=None, input_shape=(224,224,3)),
+                tf.keras.layers.Flatten(),
+                tf.keras.layers.Dense(256),
+                tf.keras.layers.Dropout(0.0),
+                tf.keras.layers.Dense(5)
+            ])
+            model_usg.load_weights(USG_MODEL_PATH)
+            
+        if os.path.exists(MRI_MODEL_PATH): 
+            model_mri = tf.keras.models.load_model(MRI_MODEL_PATH, compile=False)
         print("✅ Lab, USG, MRI Modelleri: Yüklendi")
     except Exception as e:
         print(f"HATA: ML modelleri yüklenirken bir sorun oluştu: {e}")
@@ -225,7 +237,9 @@ async def evaluate_hcc_risk(
     hbv_status: Optional[str] = Form(None),
     cancer_history_status: Optional[str] = Form(None),
     pst_score: Optional[int] = Form(0),
-    doctor_note: Optional[str] = Form(None)
+    doctor_note: Optional[str] = Form(None),
+    usg_result_json: Optional[str] = Form(None),
+    mri_analysis_json: Optional[str] = Form(None)
 ):
     if not patient_tc or not patient_tc.strip():
         raise HTTPException(status_code=400, detail="TC Kimlik Numarası zorunludur.")
@@ -240,15 +254,24 @@ async def evaluate_hcc_risk(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Lab verisi hatası: {e}")
 
+    # Eğer USG dosyası yüklendiyse: CNN + VLM çalıştır
     if usg_file and usg_file.filename:
+        contents = await usg_file.read()
+        usg_result = {}
+        
+        # 1. Yerel CNN Modeli (VGG16) Analizi
         try:
-            contents = await usg_file.read()
             usg_result = await predict_usg_fibrosis(contents)
-            vlm_report_data = await generate_radiology_report_vlm(contents, usg_result['stage_label'], doctor_name)
         except Exception as e:
-            print(f"USG dosyası işleme hatası: {e}")
-            usg_result = {"error": "USG dosyası işlenemedi."}
-            vlm_report_data = {"text": "USG hatası nedeniyle VLM raporu oluşturulamadı.", "model_used": "N/A"}
+            print(f"USG CNN modeli işleme hatası: {e}")
+            usg_result = {"error": "USG analiz modeli yüklenmedi veya işlenemedi.", "stage_label": "Bilinmiyor (CNN Hatası)"}
+            
+        # 2. VLM (Görsel Dil Modeli - Gemini) Analizi
+        try:
+            vlm_report_data = await generate_radiology_report_vlm(contents, usg_result.get('stage_label', 'Bilinmiyor'), doctor_name)
+        except Exception as e:
+            print(f"VLM dosyası işleme hatası: {e}")
+            vlm_report_data = {"text": "VLM destekli görüntü analizi yapılamadı.", "model_used": "N/A"}
 
     if mri_file and mri_file.filename:
         try:
@@ -257,6 +280,18 @@ async def evaluate_hcc_risk(
         except Exception as e:
             print(f"MRI dosyası işleme hatası: {e}")
             mri_analysis_result = {"error": "MRI dosyası işlenemedi."}
+
+    # Dosya yüklenmemişse ama ilk çağrıdan JSON sonuç geldiyse, onu kullan (LLMRaporu ikinci çağrısı)
+    if not usg_result and usg_result_json:
+        try:
+            usg_result = json.loads(usg_result_json)
+            print(f"📋 USG sonucu JSON'dan alındı: {usg_result}")
+        except: pass
+    if not mri_analysis_result and mri_analysis_json:
+        try:
+            mri_analysis_result = json.loads(mri_analysis_json)
+            print(f"📋 MRI sonucu JSON'dan alındı: {mri_analysis_result}")
+        except: pass
 
     comprehensive_context = {
         "patient_details": {

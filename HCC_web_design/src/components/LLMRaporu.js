@@ -1,7 +1,6 @@
 // src/components/LLMRaporu.js
 
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import html2pdf from 'html2pdf.js';
 import { useEffect, useState } from 'react';
 import { FaDownload, FaSpinner } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
@@ -43,6 +42,21 @@ const LLMRaporu = () => {
         payload.append('doctor_name', storedData.selectedDoctor);
         payload.append("afp_value", parseFloat(storedData.patientDetails.AFP || 0));
 
+        // İlk API çağrısından dönen sonuçları da gönder (dosya tekrar yüklenemediği için)
+        payload.append("doctor_note", storedData.patientDetails.doctor_note || "");
+        payload.append("alcohol_consumption", storedData.patientDetails.alcohol || "");
+        payload.append("smoking_status", storedData.patientDetails.smoking || "");
+        payload.append("hcv_status", storedData.patientDetails.hcv || "");
+        payload.append("hbv_status", storedData.patientDetails.hbv || "");
+        payload.append("cancer_history_status", storedData.patientDetails.cancer_history || "");
+        // İlk çağrıdan gelen USG ve MRI sonuçlarını JSON olarak aktar
+        if (storedData.apiResult?.usg_result) {
+          payload.append("usg_result_json", JSON.stringify(storedData.apiResult.usg_result));
+        }
+        if (storedData.apiResult?.mri_analysis) {
+          payload.append("mri_analysis_json", JSON.stringify(storedData.apiResult.mri_analysis));
+        }
+
         const response = await fetch("http://localhost:8000/evaluate_hcc_risk", { method: "POST", body: payload });
         if (!response.ok) {
             const errorData = await response.json();
@@ -65,25 +79,37 @@ const LLMRaporu = () => {
   }, []);
   
   const handleDownloadPdf = () => {
-    const input = document.getElementById('rapor-icerigi');
+    const originalElement = document.getElementById('rapor-icerigi');
     const downloadButton = document.querySelector('.download-pdf-button');
     if (downloadButton) downloadButton.style.display = 'none';
-    html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210, pageHeight = 297;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight, position = 0;
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-        const fileName = `${patientDetails?.name}_${patientDetails?.surname}_HCC_Raporu.pdf`;
-        pdf.save(fileName);
+
+    // Clone element to dynamically manipulate for PDF without affecting UI
+    const clone = originalElement.cloneNode(true);
+    
+    // Group headings with their following paragraphs to prevent orphaned headings at the bottom of pages
+    const headings = clone.querySelectorAll('.markdown-icerik h2, .markdown-icerik h3');
+    headings.forEach(heading => {
+      const nextEl = heading.nextElementSibling;
+      // Wrap heading and the element immediately after it (P, UL) in a non-breaking div
+      if (nextEl && ['P', 'UL', 'OL'].includes(nextEl.tagName)) {
+        const wrapper = document.createElement('div');
+        wrapper.style.pageBreakInside = 'avoid';
+        heading.parentNode.insertBefore(wrapper, heading);
+        wrapper.appendChild(heading);
+        wrapper.appendChild(nextEl);
+      }
+    });
+
+    const opt = {
+      margin: [15, 0, 15, 0], // Top, Left, Bottom, Right
+      filename: `${patientDetails?.name}_${patientDetails?.surname}_HCC_Raporu.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(clone).save().then(() => {
         if (downloadButton) downloadButton.style.display = 'block';
     });
   };

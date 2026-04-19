@@ -35,7 +35,7 @@
 - **Modeller:** TensorFlow, Keras, XGBoost, Joblib, Nibabel (MRI/NIfTI)
 
 ### **AI & LLM Servisleri**
-- **Google AI:** Gemini 1.5 Flash & 2.0 Flash
+- **Google AI:** Gemini 2.5 Flash & 2.0 Flash
 - **Groq:** Llama 3 (70B & 8B)
 - **OpenRouter:** DeepSeek Chat
 
