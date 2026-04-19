@@ -140,7 +140,7 @@ async def generate_comprehensive_report(context: dict, doctor_name: str):
         
     prompt = f""" 
 # GÖREV VE ROL
-Sen, hepatoloji ve onkoloji alanlarında uzmanlaşmış, farklı tıbbi verileri sentezleyerek kapsamlı bir klinik değerlendirme raporu hazırlayan bir yapay zeka asistanısın. Görevin, aşağıda sunulan verileri analiz ederek bütüncül, yapılandırılmış ve profesyonel bir tıbbi rapor oluşturmaktır.
+Sen bir Klinik Karar Destek Sistemi asistanısın. Görevin, doktorun manuel notlarını ve sayısal verileri birleştirmektir.
 
 # HASTA VERİLERİ
 ---------------------------------
@@ -156,13 +156,34 @@ Sen, hepatoloji ve onkoloji alanlarında uzmanlaşmış, farklı tıbbi verileri
 **3. Manyetik Rezonans (MR) Analizi:** Nodül Sayısı: {context.get('mri_analysis', {}).get('nodule_count', 'N/A')}, Tümör Oranı: %{context.get('mri_analysis', {}).get('tumor_ratio', 'N/A')}, Evre: {context.get('mri_analysis', {}).get('stage', 'N/A')}
 **4. Klinik Notlar:** {context.get("doctor_note") or "Belirtilmemiş"}
 
+# KRİTİK TALİMAT (Entegrasyon Zorunluluğu)
+Sana bir "Doktorun Klinik Notu" iletildiğinde, raporun içindeki "veri eksik" veya "bilgi bulunmamaktadır" şeklindeki standart kalıpları derhal iptal etmelisin. 
+
+1. **ÖZET BÖLÜMÜNDE:** Eğer doktor bir nodül belirtmişse, "Görüntüleme verisi eksik" demek yerine "Doktor tarafından saptanan şüpheli nodül bulgusu mevcuttur" yazmalısın.
+2. **YORUMLAMA BÖLÜMÜNDE:** Doktorun notunu laboratuvarın %31.64'lük skoruyla doğrudan ilişkilendir. (Örn: "Doktorun klinik olarak saptadığı nodül, laboratuvarın yüksek risk skoruyla birleştiğinde malignite şüphesini kuvvetlendirmektedir.")
+3. **ÖNERİLER BÖLÜMÜNDE:** Genel bir liste vermek yerine, doktorun gördüğü o spesifik nodüle yönelik (Biyopsi, Dinamik BT vb.) adımları ilk sıraya koy.
+
 # İSTENEN RAPOR FORMATI
-Aşağıdaki başlıkları kullanarak, yukarıdaki verileri sentezleyen detaylı bir rapor oluştur:
-**1. Klinik Özet:**
-**2. Bulguların Entegrasyonu ve Yorumlanması:**
-**3. Bütünsel Risk Değerlendirmesi:**
-**4. Klinik Öneri ve Sonraki Adımlar:**
-**5. Doktorun Özel Notları:** (Bu bölüme sadece doktorun notunu ('{context.get("doctor_note") or "Belirtilmemiş"}') aynen aktar.)
+Aşağıdaki başlıkları kullanarak ve SADECE Markdown formatında (HTML kullanmadan) rapor oluştur:
+
+1. Ana Başlıklar `## **BAŞLIK ADI**` (H2 ve Kalın) şeklinde olmalıdır.
+2. Alt Başlıklar `### **Alt Başlık Adı**` (H3 ve Kalın) şeklinde olmalıdır.
+3. Önemli değerleri ve test isimlerini **kalın** yap.
+
+KESİN KURALLAR (STRICT REQUIREMENTS):
+- "İşte raporunuz", "Rapor tamamlandı" gibi giriş ve çıkış cümleleri YAZMA. Doğrudan raporu başlat.
+- 5. Doktorun Özel Notları bölümünü veya başlığını ASLA OLUŞTURMA.
+- Aşağıdaki başlıkları tam olarak bu isimlerle kullan:
+## **1. Klinik Özet**
+## **2. Bulguların Entegrasyonu ve Yorumlanması**
+(Laboratuvar sonuçları ile "Doktorun Klinik Notu"ndaki bulguların tıbbi bir dille sentezi.)
+## **3. Bütünsel Risk Değerlendirmesi**
+(Tüm veriler ışığında genel risk analizi.)
+## **4. Klinik Öneri ve Sonraki Adımlar**
+### **4.1. Detaylı Görüntüleme:**
+### **4.2. Laboratuvar Takviyesi:**
+### **4.3. Multidisipliner Konsültasyon:**
+### **4.4. Takip Protokolü:**
 """
     
     try:

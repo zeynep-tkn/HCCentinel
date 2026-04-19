@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { useEffect, useState } from 'react';
 import { FaDownload, FaSpinner } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
 import hccSentinelLogo from '../assets/HCCentinel.png';
 import './LLMRaporu.css';
 
@@ -91,12 +92,11 @@ const LLMRaporu = () => {
     const reportText = apiResult?.comprehensive_report;
     if (!reportText) return <p>Yapay zeka değerlendirmesi bulunamadı.</p>;
     if (apiResult.error) return <p className="rapor-hata-mesaji">{reportText}</p>;
-    return reportText.split('\n').map((line, index) => {
-      line = line.trim();
-      if (line.startsWith('**') && line.endsWith('**')) return <h4 key={index}>{line.replaceAll('**', '')}</h4>;
-      if (line.startsWith('* ')) return <p key={index}><strong>{line.substring(2)}</strong></p>;
-      return <p key={index}>{line || <br />}</p>;
-    });
+    return (
+      <div className="markdown-icerik">
+        <ReactMarkdown>{reportText}</ReactMarkdown>
+      </div>
+    );
   };
 
   if (isLoading) {

@@ -244,3 +244,53 @@
   border-top: 1px solid #eee;
   padding-top: 15px;
 }
+
+/* React-Markdown Özel Stilleri */
+.markdown-icerik {
+  width: 100%;
+}
+
+.markdown-icerik h2 {
+  font-size: 14pt;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  padding-left: 10px;
+  text-align: left;
+}
+
+.markdown-icerik h3 {
+  font-size: 12pt;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  padding-left: 10px;
+  text-align: left;
+}
+
+.markdown-icerik p {
+  font-size: 11pt;
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: justify;
+  line-height: 1.6;
+}
+
+.markdown-icerik ul, .markdown-icerik ol {
+  padding-left: 30px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.markdown-icerik li {
+  font-size: 11pt;
+  line-height: 1.6;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.markdown-icerik strong {
+  font-weight: bold;
+}
