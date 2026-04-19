@@ -96,20 +96,23 @@ const TahminSonuc = () => {
   const overallRisk = apiResult?.overall_risk_level || "Belirlenemedi";
   
   let riskBoxClass = "risk-kutusu";
-  if (overallRisk.includes("Düşük Risk")) riskBoxClass += " risk-dusuk";
-  else if (overallRisk.includes("Orta Risk")) riskBoxClass += " risk-orta";
+  if (overallRisk.includes("Çok Yüksek Risk")) riskBoxClass += " risk-cok-yuksek";
   else if (overallRisk.includes("Yüksek Risk")) riskBoxClass += " risk-yuksek";
+  else if (overallRisk.includes("Orta Risk")) riskBoxClass += " risk-orta";
+  else if (overallRisk.includes("Düşük Risk")) riskBoxClass += " risk-dusuk";
 
   const veriListesi = [];
   if (patientDetails.age) veriListesi.push("yaş");
   if (patientDetails.gender) veriListesi.push("cinsiyet");
-  if (patientDetails.afp) veriListesi.push("AFP");
+  if (patientDetails.AFP || patientDetails.afp) veriListesi.push("AFP değeri");
   if (patientDetails.ALT) veriListesi.push("ALT");
   if (patientDetails.AST) veriListesi.push("AST");
   if (patientDetails.ALP) veriListesi.push("ALP");
   if (patientDetails.BIL) veriListesi.push("Bilirubin");
   if (patientDetails.GGT) veriListesi.push("GGT");
   if (patientDetails.Albumin) veriListesi.push("Albumin");
+  if (patientDetails.hbv || patientDetails.hcv) veriListesi.push("viral durum (HBV/HCV)");
+  if (patientDetails.cancer_history && patientDetails.cancer_history !== "Yok") veriListesi.push("kanser öyküsü");
   if (patientDetails.ultrasonFileUploaded) veriListesi.push("Ultrason görüntüsü");
   if (patientDetails.btFileUploaded) veriListesi.push("MR görüntüsü");
 

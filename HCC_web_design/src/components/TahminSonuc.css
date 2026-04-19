@@ -179,6 +179,11 @@
   color: #721c24;
 }
 
+.risk-kutusu.risk-cok-yuksek {
+  background-color: #721c24;
+  color: #ffffff;
+}
+
 .risk-kart .risk-icerik {
   display: flex;
   flex-direction: column;

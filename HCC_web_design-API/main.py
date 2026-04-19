@@ -101,12 +101,12 @@ def count_nodules_mri(volume):
     return num_features
 
 def classify_stage_mri(tumor_ratio, nodule_count, pst_score):
-    if pst_score >= 3: return "Evre D - Son Evre"
-    if tumor_ratio > 50 or nodule_count > 5 or pst_score == 2: return "Evre C - İleri Evre"
-    if tumor_ratio > 25 or nodule_count > 2: return "Evre B - Orta Evre"
-    if tumor_ratio > 5 or nodule_count > 0: return "Evre A - Erken Evre"
-    if tumor_ratio > 0: return "Evre 0 - Çok Erken Evre"
-    return "Evre 0 - Tümör Tespit Edilmedi"
+    if pst_score >= 3: return "Stage 4 - Advanced Stage"
+    if tumor_ratio > 50 or nodule_count > 5 or pst_score == 2: return "Stage 4 - Advanced Stage"
+    if tumor_ratio > 25 or nodule_count > 2: return "Stage 3 - Intermediate-Advanced Stage"
+    if tumor_ratio > 5 or nodule_count > 0: return "Stage 2 - Early Stage"
+    if tumor_ratio > 0: return "Stage 1 - Very Early Stage"
+    return "Stage 0 - No Tumor Detected"
 
 # main.py dosyasındaki bu fonksiyonu güncelleyin
 
@@ -133,6 +133,69 @@ async def predict_lab_risk(data: LabData):
         "hcc_probability": float(hcc_prob), 
         "risk_level": risk_level
     }
+
+def calculate_comprehensive_risk(
+    lab_risk_level: str,
+    usg_stage: str,
+    mri_stage: str,
+    afp: float,
+    hbv: str,
+    hcv: str,
+    cancer_history: str
+):
+    # Risk hiyerarşisi (Sıralı liste)
+    risk_order = ["Düşük Risk", "Orta Risk", "Yüksek Risk", "Çok Yüksek Risk"]
+    
+    # Başlangıç riskini lab modelinden al
+    current_risk_idx = risk_order.index(lab_risk_level) if lab_risk_level in risk_order else 0
+    final_risk_idx = current_risk_idx
+
+    # 1. USG (Metavir) Güncellemesi
+    if usg_stage:
+        if "F2" in usg_stage:
+            final_risk_idx = max(final_risk_idx, 1) # Orta
+        elif "F3" in usg_stage:
+            final_risk_idx = max(final_risk_idx, 2) # Yüksek
+        elif "F4" in usg_stage or "Siroz" in usg_stage:
+            final_risk_idx = max(final_risk_idx, 3) # Çok Yüksek
+
+    # 2. MRI (Evreleme) Güncellemesi
+    if mri_stage:
+        # Stage 0 değilse (1, 2, 3, 4 ise) doğrudan Çok Yüksek Risk (Tümör saptandı)
+        if any(f"Stage {i}" in mri_stage for i in [1, 2, 3, 4]) or \
+           "İleri Evre" in mri_stage or "Erken Evre" in mri_stage:
+            final_risk_idx = 3 # Çok Yüksek
+        elif "Stage 0" in mri_stage or "Tümör Tespit Edilmedi" in mri_stage:
+            final_risk_idx = max(final_risk_idx, 1) # Orta (Takip önerisi)
+
+    # 3. Viral Durumlar (HBV/HCV)
+    hbv_pos = hbv and hbv.strip().lower() in ["evet", "pozitif", "var"]
+    hcv_pos = hcv and hcv.strip().lower() in ["evet", "pozitif", "var"]
+    
+    if hbv_pos:
+        # HBV + F2/F3 ise risk Yüksek
+        if usg_stage and ("F2" in usg_stage or "F3" in usg_stage):
+            final_risk_idx = max(final_risk_idx, 2) # Yüksek
+            
+    if hcv_pos:
+        # HCV + F3 ise risk Yüksek
+        if usg_stage and "F3" in usg_stage:
+            final_risk_idx = max(final_risk_idx, 2) # Yüksek
+
+    # 4. AFP & Siroz (AFP eşikleri)
+    is_siroz = usg_stage and ("F4" in usg_stage or "Siroz" in usg_stage)
+    if is_siroz:
+        if afp and afp > 400:
+            final_risk_idx = 3 # Çok Yüksek (Tanısal)
+        elif afp and afp > 200:
+            final_risk_idx = max(final_risk_idx, 2) # Yüksek
+
+    # 5. Kanser Öyküsü
+    has_history = cancer_history and cancer_history.strip().lower() in ["evet", "var"]
+    if has_history and final_risk_idx == 0:
+        final_risk_idx = 1 # Orta (Risk düşükse ortamaya çek)
+
+    return risk_order[final_risk_idx]
 
 async def predict_usg_fibrosis(file_bytes: bytes):
     if model_usg is None: raise HTTPException(status_code=500, detail="USG modeli yüklenmedi.")
@@ -345,8 +408,19 @@ async def evaluate_hcc_risk(
         db.rollback()
         print(f"Veritabanı Kayıt Hatası: {e}")
 
+    # --- KAPSAMLI RİSK HESAPLAMA ---
+    overall_risk = calculate_comprehensive_risk(
+        lab_risk_level=lab_result.get("risk_level", "Düşük Risk"),
+        usg_stage=usg_result.get("stage_label", ""),
+        mri_stage=mri_analysis_result.get("stage", ""),
+        afp=afp_value or 0.0,
+        hbv=hbv_status,
+        hcv=hcv_status,
+        cancer_history=cancer_history_status
+    )
+
     return {
-        "overall_risk_level": lab_result.get("risk_level", "Belirlenemedi"),
+        "overall_risk_level": overall_risk,
         "lab_result": lab_result,
         "usg_result": usg_result,
         "mri_analysis": mri_analysis_result,
