@@ -382,15 +382,20 @@ const InputPage = () => {
             <h3>{label} Görüntüsü Yükleme</h3>
             <label htmlFor={`${type}-upload`} className="upload-area">
                 {url ? (
-                  file.name.toLowerCase().match(/\.(nii|nii.gz|dcm)$/) ? (
-                  <p>Yüklü: {url}</p>
-                  ) : (
-                  <img src={url} alt={`${label} Önizleme`} />
-                  )
+                  <div className="preview-content">
+                    {file.name.toLowerCase().match(/\.(nii|nii.gz|dcm)$/) ? (
+                      <p className="upload-filename">Yüklü: {file.name}</p>
+                    ) : (
+                      <>
+                        <img src={url} alt={`${label} Önizleme`} />
+                        <p className="upload-filename">Yüklü: {file.name}</p>
+                      </>
+                    )}
+                  </div>
                 ) : (
-                  <div>
-                  <strong>{label} Görüntüsü Yükle</strong>
-                  <small>Sürükleyin veya gözatın</small>
+                  <div className="upload-placeholder">
+                    <strong>{label} Görüntüsü Yükle</strong>
+                    <small>Sürükleyin veya gözatın</small>
                   </div>
                 )}
             </label>

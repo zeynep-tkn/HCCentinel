@@ -235,6 +235,28 @@ label {
   background-color: #e0f2fe;
 }
 
+.preview-content, .upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.upload-filename {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e3a8a;
+  margin-top: 8px;
+  background: #e0f2fe;
+  padding: 4px 12px;
+  border-radius: 6px;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .upload-area div {
   display: flex;
   flex-direction: column;
