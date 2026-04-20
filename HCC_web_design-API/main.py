@@ -101,12 +101,33 @@ def count_nodules_mri(volume):
     return num_features
 
 def classify_stage_mri(tumor_ratio, nodule_count, pst_score):
-    if pst_score >= 3: return "Stage 4 - Advanced Stage"
-    if tumor_ratio > 50 or nodule_count > 5 or pst_score == 2: return "Stage 4 - Advanced Stage"
-    if tumor_ratio > 25 or nodule_count > 2: return "Stage 3 - Intermediate-Advanced Stage"
-    if tumor_ratio > 5 or nodule_count > 0: return "Stage 2 - Early Stage"
-    if tumor_ratio > 0: return "Stage 1 - Very Early Stage"
-    return "Stage 0 - No Tumor Detected"
+    if tumor_ratio == 0 and nodule_count == 0:
+        return "Evre 0 - Tümör Tespit Edilmedi"
+        
+    # Tümör Oranı Puanı
+    if tumor_ratio <= 15:
+        ratio_score = 0
+    elif tumor_ratio <= 35:
+        ratio_score = 1
+    else:
+        ratio_score = 2
+        
+    # Nodül Sayısı Puanı
+    if nodule_count <= 1:
+        nodule_score = 0
+    elif nodule_count <= 3:
+        nodule_score = 1
+    else:
+        nodule_score = 2
+        
+    total_score = ratio_score + nodule_score
+    
+    if total_score == 0:
+        return "Evre A - Erken Evre"
+    elif total_score in [1, 2]:
+        return "Evre B - Orta Evre"
+    else:
+        return "Evre C - İleri Evre"
 
 # main.py dosyasındaki bu fonksiyonu güncelleyin
 
@@ -161,11 +182,10 @@ def calculate_comprehensive_risk(
 
     # 2. MRI (Evreleme) Güncellemesi
     if mri_stage:
-        # Stage 0 değilse (1, 2, 3, 4 ise) doğrudan Çok Yüksek Risk (Tümör saptandı)
-        if any(f"Stage {i}" in mri_stage for i in [1, 2, 3, 4]) or \
-           "İleri Evre" in mri_stage or "Erken Evre" in mri_stage:
+        # Eğer tümör varsa (Evre A, B, C veya Stage 1-4) doğrudan Çok Yüksek Risk (Tümör saptandı)
+        if any(evre in mri_stage for evre in ["Evre A", "Evre B", "Evre C", "Erken", "Orta", "İleri", "Stage 1", "Stage 2", "Stage 3", "Stage 4"]):
             final_risk_idx = 3 # Çok Yüksek
-        elif "Stage 0" in mri_stage or "Tümör Tespit Edilmedi" in mri_stage:
+        elif "Evre 0" in mri_stage or "Tümör Tespit Edilmedi" in mri_stage or "Stage 0" in mri_stage:
             final_risk_idx = max(final_risk_idx, 1) # Orta (Takip önerisi)
 
     # 3. Viral Durumlar (HBV/HCV)

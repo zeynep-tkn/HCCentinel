@@ -421,9 +421,11 @@ const InputPage = () => {
             "Ek patolojik bulgu saptanmadı.",
             "Sirotik zemin ile uyumlu bulgular."
           ].map((note, index) => (
-            <button key={index} type="button" className="quick-note-btn" onClick={() => {
+            <button key={index} type="button" className="quick-note-btn" onClick={(e) => {
+                const tooltipSpan = e.currentTarget.querySelector('.tooltip');
+                const textToAdd = tooltipSpan ? tooltipSpan.textContent : note;
                 const currentNote = form.doctor_note ? form.doctor_note.trim() : "";
-                const newNote = currentNote ? `${currentNote} ${note}` : note;
+                const newNote = currentNote ? `${currentNote} ${textToAdd}` : textToAdd;
                 setForm({ ...form, doctor_note: newNote });
               }}
             >
