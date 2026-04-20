@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css'; 
 import logo from '../assets/HCCentinel.png'; 
 import Modal from './Modal';
+
+import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+const TourBox = ({ title, content, isVisible, onNext, onPrev, onClose, isFirst, isLast, type = 'input' }) => {
+  if (!isVisible) return null;
+  const boxClass = type === 'button' ? 'tour-box for-button' : 'tour-box';
+  return (
+    <div className={boxClass}>
+      <div className="tour-box-title">{title}</div>
+      <div className="tour-box-content">{content}</div>
+      <div className="tour-navigation">
+        {isFirst ? <div></div> : <button type="button" onClick={onPrev} className="tour-button secondary">Geri</button>}
+        {isLast ? <button type="button" onClick={onClose} className="tour-button">Bitir</button> : <button type="button" onClick={onNext} className="tour-button">İleri</button>}
+      </div>
+    </div>
+  );
+};
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -14,6 +32,33 @@ const RegisterPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
+
+  const [tourStep, setTourStep] = useState(0);
+  const totalSteps = 5;
+  const tourIconRef = useRef(null);
+  const formRef = useRef(null);
+
+  const startTour = () => setTourStep(1);
+  const endTour = () => setTourStep(0);
+  const nextStep = () => setTourStep(current => (current < totalSteps ? current + 1 : 0));
+  const prevStep = () => setTourStep(current => (current > 1 ? current - 1 : 0));
+
+  useEffect(() => {
+    if (tourStep === 0) return;
+    function handleClickOutside(event) {
+      if (
+        formRef.current && !formRef.current.contains(event.target) && 
+        tourIconRef.current && !tourIconRef.current.contains(event.target) &&
+        !event.target.closest('.tour-box')
+      ) {
+        endTour();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [tourStep]);
 
   const showModal = (title, message, type = 'info') => {
     setModal({ isOpen: true, title, message, type });
@@ -61,7 +106,12 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="auth-container">
+      <button type="button" ref={tourIconRef} onClick={startTour} className="info-icon-button" title="Rehberi Başlat">
+        <FontAwesomeIcon icon={faLightbulb} size="2x" />
+      </button>
+
+      <div className="login-container">
       {/* MODAL BİLEŞENİ */}
       <Modal 
         isOpen={modal.isOpen} 
@@ -75,7 +125,7 @@ const RegisterPage = () => {
         <p className="welcome-text">Yeni bir hesap oluşturun</p>
       </div>
 
-      <form className="login-box" onSubmit={handleRegister}>
+      <form ref={formRef} className="login-box" onSubmit={handleRegister}>
         {error && <p className="error-message">{error}</p>}
         
         <div className="input-wrapper">
@@ -86,6 +136,15 @@ const RegisterPage = () => {
             value={form.name}
             onChange={handleChange}
             required
+          />
+          <TourBox 
+            title="1. Ad Alanı" 
+            content="Lütfen adınızı buraya girin."
+            isVisible={tourStep === 1}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onClose={endTour}
+            isFirst={true}
           />
         </div>
 
@@ -98,6 +157,14 @@ const RegisterPage = () => {
             onChange={handleChange}
             required
           />
+          <TourBox 
+            title="2. Soyad Alanı" 
+            content="Lütfen soyadınızı buraya girin."
+            isVisible={tourStep === 2}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onClose={endTour}
+          />
         </div>
 
         <div className="input-wrapper">
@@ -108,6 +175,14 @@ const RegisterPage = () => {
             value={form.email}
             onChange={handleChange}
             required
+          />
+          <TourBox 
+            title="3. E-posta Alanı" 
+            content="Giriş yaparken kullanacağınız aktif e-posta adresinizi girin."
+            isVisible={tourStep === 3}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onClose={endTour}
           />
         </div>
 
@@ -120,10 +195,28 @@ const RegisterPage = () => {
             onChange={handleChange}
             required
           />
+          <TourBox 
+            title="4. Şifre Alanı" 
+            content="Güvenli bir şifre belirleyin."
+            isVisible={tourStep === 4}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onClose={endTour}
+          />
         </div>
 
         <div className="button-wrapper">
           <button type="submit">Hesap Oluştur</button>
+          <TourBox 
+            title="5. Kayıt Ol Butonu" 
+            content="Bilgileri eksiksiz doldurduktan sonra hesabınızı oluşturmak için bu butona tıklayın."
+            isVisible={tourStep === 5}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onClose={endTour}
+            isLast={true}
+            type="button"
+          />
         </div>
 
         <div className="login-footer">
@@ -133,6 +226,7 @@ const RegisterPage = () => {
           </p>
         </div>
       </form>
+      </div>
     </div>
   );
 };

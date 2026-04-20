@@ -22,29 +22,31 @@
   width: 100%;
 }
 
-.tour-box {
+.input-page .tour-box {
   position: absolute;
-  left: 102%; 
-  top: 20px; 
-  transform: translateY(0);
-  width: 280px;
+  left: 10px; 
+  top: 40px; 
+  width: 320px;
   background-color: #fff;
-  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  z-index: 100;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  padding: 20px;
+  z-index: 10000;
+  border: 1px solid #e0e0e0;
+  border-left: 6px solid #ffc107; /* Rehber temasına uygun sarı şerit */
 }
 
-.tour-box.right-col {
-    left: auto;
-    right: 102%;
+.input-page .tour-box.right-col {
+  left: auto;
+  right: 10px; /* Laboratuvar sonuçları sağdaysa sağda kalsın */
 }
 
-.tour-box.for-button {
-    left: 50%;
-    top: 115%;
-    transform: translateX(-50%);
+.input-page .tour-box.for-button {
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: 130%;
+  transform: translateX(-50%);
 }
 
 .tour-box-title {
